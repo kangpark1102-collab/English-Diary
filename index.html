@@ -1156,10 +1156,8 @@
 
 
         // --- Gemini Integration (Fixed for Canvas Environment) ---
-        // ⚠️ 넷플리파이(Netlify)나 깃허브(GitHub)에 파일을 올려서 사용하실 때는 
-        // 반드시 아래의 따옴표("") 사이에 발급받으신 API 키를 직접 넣어주셔야 작동합니다!
-        // 예시: const apiKey = "AIzaSyC5MhxjMl39flSNUbQxoQOGabzhes9CDcU";
-        const apiKey = "";
+        // ⚠️ 주의: 노출되었던 기존 키가 아닌 새로 발급받으신 API 키를 넣어주세요!
+        const apiKey = "AIzaSyC5MhxjMl39flSNUbQxoQOGabzhes9CDcU"; 
 
         // API 재시도 로직 (안정성 강화)
         async function fetchWithBackoff(url, options, retries = 5) {
