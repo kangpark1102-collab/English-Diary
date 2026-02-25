@@ -1,24 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 
 <head>
     <meta charset="UTF-8">
     <!-- iOS 앱처럼 보이게 화면 확대 방지 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>English Diary</title>
-    
+    <title>Happy Dairy</title>
+
     <!-- iOS 홈 화면 아이콘 및 앱 이름 설정 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="English Diary">
+    <meta name="apple-mobile-web-app-title" content="Happy Dairy">
     <!-- 아이콘 이미지 설정 -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%234F46E5' rx='20'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E%F0%9F%93%96%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23FF6B6B' rx='20'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E%F0%9F%92%96%3C/text%3E%3C/svg%3E">
 
     <!-- Include Marked for rendering Gemini Markdown -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- Include FontAwesome for Stickers -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Dancing+Script:wght@700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --primary: #4F46E5;
@@ -42,11 +45,123 @@
             font-family: 'Inter', -apple-system, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
+            /* Page Transition */
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+
+        /* --- Intro Page Styles --- */
+        #intro-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 200;
+            background-color: #ffffff; /* 하얀 배경으로 깔끔하게 */
+            transition: transform 0.5s ease-in-out;
+            padding-top: 50px; /* 제목을 제일 위로 배치 */
+        }
+
+        #intro-page.hidden {
+            transform: translateY(-100%);
+        }
+
+        .intro-bg {
+            position: absolute;
+            top: 130px; /* 제목 밑에 위치하도록 조정 */
+            left: 0;
+            width: 100%;
+            height: calc(100% - 130px);
+            /* 핀터레스트 이미지 링크로 배경 설정 */
+            background-image: url('https://i.pinimg.com/1200x/0d/4b/b7/0d4bb7254c6e15c1ab74e6c1a170be4a.jpg');
+            background-size: contain; /* 머리부터 발끝까지 보이게 비율 조정 */
+            background-position: center top;
+            background-repeat: no-repeat;
+            z-index: 1;
+        }
+
+        .intro-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 4.5rem;
+            color: var(--text-main);
+            margin: 0;
+            z-index: 2;
+        }
+
+        .intro-buttons {
+            display: flex;
+            flex-direction: column; /* 위, 아래로 배치 */
+            gap: 20px;
+            position: absolute;
+            top: 55%; /* 중간에 배치 */
+            transform: translateY(-50%);
+            z-index: 3;
+        }
+
+        .intro-btn {
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            font-weight: 800; /* 진한 글씨 */
+            color: #FFFFFF; /* 하양색 */
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            font-family: 'Inter', -apple-system, sans-serif; /* 깔끔한 고딕체 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 220px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3); /* 잘 보이게 그림자 추가 */
+        }
+
+        .btn-min {
+            background-color: #87CEEB; /* 하늘색 */
+        }
+
+        .btn-so {
+            background-color: #FFC0CB; /* 핑크색 */
+        }
+
+        .intro-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .intro-btn i {
+            color: #FFFFFF; /* 하트도 하양색으로 통일 */
+        }
+
+        /* --- Diary App Styles --- */
+        #diary-app-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
+            align-items: flex-start;
             padding: 30px 20px;
-            min-height: 100vh;
+            overflow-y: auto;
+            /* Ensure scrolling for long diaries */
+            transition: transform 0.5s ease-in-out;
+            transform: translateY(100%);
         }
+
+        #diary-app-container.active {
+            transform: translateY(0);
+        }
+
 
         .app-container {
             background: var(--card-bg);
@@ -58,10 +173,13 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            position: relative;
+            /* Important for absolute positioning inside */
         }
 
         .header {
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
@@ -69,6 +187,24 @@
             color: var(--text-main);
             font-weight: 700;
         }
+
+        .back-to-home-btn {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 5px;
+            transition: color 0.2s;
+        }
+
+        .back-to-home-btn:hover {
+            color: var(--text-main);
+        }
+
 
         /* Date & Mood */
         .top-controls {
@@ -190,20 +326,24 @@
             background: rgba(0, 0, 0, 0.8);
         }
 
-        /* Text Input */
+        /* Text Input - Adjusted Font Size and Line Height */
         .diary-input {
             width: 100%;
-            min-height: 250px;
+            /* Increase min-height to accommodate 3 more lines */
+            min-height: 330px;
             padding: 8px 16px;
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            font-size: 1.6rem;
+            /* Slightly smaller font size */
+            font-size: 1.5rem;
             resize: vertical;
+            /* Adjusted line height to match background */
             line-height: 32px;
             outline: none;
             transition: border-color 0.2s;
             font-family: inherit;
             background-color: #F9FAFB;
+            /* Lined paper effect - must match line-height */
             background-image: repeating-linear-gradient(transparent, transparent 31px, #D1D5DB 31px, #D1D5DB 32px);
             background-attachment: local;
         }
@@ -293,6 +433,20 @@
                 padding: 0;
                 align-items: flex-start;
                 margin: 0;
+                overflow: visible;
+                height: auto;
+            }
+
+            #intro-page {
+                display: none !important;
+            }
+
+            #diary-app-container {
+                transform: none !important;
+                position: static;
+                padding: 0;
+                height: auto;
+                overflow: visible;
             }
 
             .app-container {
@@ -308,7 +462,8 @@
             #file-input,
             .toast,
             .photo-upload svg,
-            .photo-upload span {
+            .photo-upload span,
+            .back-to-home-btn {
                 display: none !important;
             }
 
@@ -455,11 +610,21 @@
             align-items: center;
             gap: 6px;
         }
-        
+
         /* Add some basic markdown styling for the feedback box */
-        .gemini-feedback p { margin-bottom: 10px; }
-        .gemini-feedback strong { font-weight: 700; color: #14532d; }
-        .gemini-feedback ul { margin-left: 20px; margin-bottom: 10px; }
+        .gemini-feedback p {
+            margin-bottom: 10px;
+        }
+
+        .gemini-feedback strong {
+            font-weight: 700;
+            color: #14532d;
+        }
+
+        .gemini-feedback ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
 
         .gemini-loading {
             display: none;
@@ -482,7 +647,7 @@
         /* Responsive */
         @media (max-width: 480px) {
             body {
-                padding: 10px;
+                /* padding: 10px;  Removed padding from body for full-screen intro */
             }
 
             .app-container {
@@ -504,105 +669,145 @@
                 width: 18px;
                 height: 18px;
             }
+
+            .intro-title {
+                font-size: 3.5rem;
+            }
+
+            .intro-btn {
+                padding: 15px 30px;
+                font-size: 1.3rem;
+                width: 180px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="app-container" id="diary-card" style="position: relative;">
-        <div class="header">
-            <h1>English Diary</h1>
+    <!-- Intro Page -->
+    <div id="intro-page">
+        <h1 class="intro-title">Happy Dairy</h1>
+        <div class="intro-bg"></div>
+        <div class="intro-buttons">
+            <button class="intro-btn btn-min" onclick="showDiary('min')">Min <i class="fa-solid fa-heart"></i></button>
+            <button class="intro-btn btn-so" onclick="showDiary('so')">So <i class="fa-solid fa-heart"></i></button>
         </div>
+    </div>
 
-        <div class="top-controls">
-            <input type="date" id="diary-date" class="date-picker">
-            <button class="mood-picker" onclick="toggleStickers()" title="Add Stickers">✨ Stickers</button>
-            <select id="diary-mood" class="mood-picker">
-                <option value="😀">😀</option>
-                <option value="😊">😊</option>
-                <option value="🥰">🥰</option>
-                <option value="😐">😐</option>
-                <option value="😢">😢</option>
-                <option value="😡">😡</option>
-                <option value="😴">😴</option>
-                <option value="🥳">🥳</option>
-            </select>
-        </div>
+    <!-- Diary App Container -->
+    <div id="diary-app-container">
+        <div class="app-container" id="diary-card">
+            <div class="header">
+                <button class="back-to-home-btn" onclick="showHome()">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <h1 id="diary-title">English Diary</h1>
+            </div>
 
-        <!-- Sticker Tray (FontAwesome) -->
-        <div class="sticker-tray" id="sticker-tray">
-            <span class="sticker" onclick="addSticker('fa-solid fa-heart', '#FF4B4B')"><i class="fa-solid fa-heart" style="color: #FF4B4B;"></i></span>
-            <span class="sticker" onclick="addSticker('fa-solid fa-star', '#FFD700')"><i class="fa-solid fa-star" style="color: #FFD700;"></i></span>
-            <span class="sticker" onclick="addSticker('fa-solid fa-face-smile', '#FF9800')"><i class="fa-solid fa-face-smile" style="color: #FF9800;"></i></span>
-            <span class="sticker" onclick="addSticker('fa-solid fa-cat', '#555555')"><i class="fa-solid fa-cat" style="color: #555555;"></i></span>
-            <span class="sticker" onclick="addSticker('fa-solid fa-dog', '#8B4513')"><i class="fa-solid fa-dog" style="color: #8B4513;"></i></span>
-            <span class="sticker" onclick="addSticker('fa-solid fa-leaf', '#4CAF50')"><i class="fa-solid fa-leaf" style="color: #4CAF50;"></i></span>
-            <span class="sticker" onclick="addSticker('fa-solid fa-music', '#9C27B0')"><i class="fa-solid fa-music" style="color: #9C27B0;"></i></span>
-            <span class="sticker" onclick="addSticker('fa-solid fa-sun', '#FFA500')"><i class="fa-solid fa-sun" style="color: #FFA500;"></i></span>
-            <span class="sticker" onclick="addSticker('fa-solid fa-moon', '#3F51B5')"><i class="fa-solid fa-moon" style="color: #3F51B5;"></i></span>
-            <span class="sticker" onclick="addSticker('fa-solid fa-crown', '#FFC107')"><i class="fa-solid fa-crown" style="color: #FFC107;"></i></span>
-        </div>
+            <div class="top-controls">
+                <input type="date" id="diary-date" class="date-picker">
+                <button class="mood-picker" onclick="toggleStickers()" title="Add Stickers">✨ Stickers</button>
+                <select id="diary-mood" class="mood-picker">
+                    <option value="😀">😀</option>
+                    <option value="😊">😊</option>
+                    <option value="🥰">🥰</option>
+                    <option value="😐">😐</option>
+                    <option value="😢">😢</option>
+                    <option value="😡">😡</option>
+                    <option value="😴">😴</option>
+                    <option value="🥳">🥳</option>
+                </select>
+            </div>
 
-        <div class="photo-upload" id="photo-container"
-            onclick="if(event.target.id !== 'remove-btn') document.getElementById('file-input').click()">
-            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z">
-                </path>
-            </svg>
-            <span>Tap to add a photo</span>
-            <img id="photo-preview" class="preview" alt="Diary Photo">
-            <button id="remove-btn" class="remove-photo" onclick="removePhoto(event)">✕</button>
-            <input type="file" id="file-input" accept="image/*" onchange="previewImage(event)">
-        </div>
+            <!-- Sticker Tray (FontAwesome) -->
+            <div class="sticker-tray" id="sticker-tray">
+                <span class="sticker" onclick="addSticker('fa-solid fa-heart', '#FF4B4B')"><i
+                        class="fa-solid fa-heart" style="color: #FF4B4B;"></i></span>
+                <span class="sticker" onclick="addSticker('fa-solid fa-star', '#FFD700')"><i
+                        class="fa-solid fa-star" style="color: #FFD700;"></i></span>
+                <span class="sticker" onclick="addSticker('fa-solid fa-face-smile', '#FF9800')"><i
+                        class="fa-solid fa-face-smile" style="color: #FF9800;"></i></span>
+                <span class="sticker" onclick="addSticker('fa-solid fa-cat', '#555555')"><i class="fa-solid fa-cat"
+                        style="color: #555555;"></i></span>
+                <span class="sticker" onclick="addSticker('fa-solid fa-dog', '#8B4513')"><i class="fa-solid fa-dog"
+                        style="color: #8B4513;"></i></span>
+                <span class="sticker" onclick="addSticker('fa-solid fa-leaf', '#4CAF50')"><i
+                        class="fa-solid fa-leaf" style="color: #4CAF50;"></i></span>
+                <span class="sticker" onclick="addSticker('fa-solid fa-music', '#9C27B0')"><i
+                        class="fa-solid fa-music" style="color: #9C27B0;"></i></span>
+                <span class="sticker" onclick="addSticker('fa-solid fa-sun', '#FFA500')"><i class="fa-solid fa-sun"
+                        style="color: #FFA500;"></i></span>
+                <span class="sticker" onclick="addSticker('fa-solid fa-moon', '#3F51B5')"><i
+                        class="fa-solid fa-moon" style="color: #3F51B5;"></i></span>
+                <span class="sticker" onclick="addSticker('fa-solid fa-crown', '#FFC107')"><i
+                        class="fa-solid fa-crown" style="color: #FFC107;"></i></span>
+            </div>
 
-        <textarea id="diary-text" class="diary-input" placeholder="Write your diary here..."></textarea>
-
-        <div class="action-buttons">
-            <button class="btn" onclick="shareContent()">
-                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <div class="photo-upload" id="photo-container"
+                onclick="if(event.target.id !== 'remove-btn') document.getElementById('file-input').click()">
+                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z">
+                        d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z">
                     </path>
                 </svg>
-                Share
-            </button>
-            <button class="btn" onclick="readAloud()" id="tts-btn">
-                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z">
-                    </path>
-                </svg>
-                Read Aloud
-            </button>
-            <button class="btn primary" onclick="exportPDF()">
-                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3">
-                    </path>
-                </svg>
-                Export PDF
-            </button>
-            <button class="btn gemini" onclick="checkGrammar()">
-                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.428-1.428L13.5 18.75l1.178-.394a2.25 2.25 0 001.428-1.428L16.5 15.75l.394 1.178a2.25 2.25 0 001.428 1.428l1.178.394-1.178.394a2.25 2.25 0 00-1.428 1.428z">
-                    </path>
-                </svg>
-                Check AI
-            </button>
-        </div>
+                <span>Tap to add a photo</span>
+                <img id="photo-preview" class="preview" alt="Diary Photo">
+                <button id="remove-btn" class="remove-photo" onclick="removePhoto(event)">✕</button>
+                <input type="file" id="file-input" accept="image/*" onchange="previewImage(event)">
+            </div>
 
-        <div id="gemini-loading" class="gemini-loading">✨ AI is analyzing your diary...</div>
-        <div id="gemini-feedback" class="gemini-feedback"></div>
+            <textarea id="diary-text" class="diary-input" placeholder="Write your diary here..."></textarea>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="shareContent()">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z">
+                        </path>
+                    </svg>
+                    Share
+                </button>
+                <button class="btn" onclick="readAloud()" id="tts-btn">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z">
+                        </path>
+                    </svg>
+                    Read Aloud
+                </button>
+                <button class="btn primary" onclick="exportPDF()">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3">
+                        </path>
+                    </svg>
+                    Export PDF
+                </button>
+                <button class="btn gemini" onclick="checkGrammar()">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.428-1.428L13.5 18.75l1.178-.394a2.25 2.25 0 001.428-1.428L16.5 15.75l.394 1.178a2.25 2.25 0 001.428 1.428l1.178.394-1.178.394a2.25 2.25 0 00-1.428 1.428z">
+                        </path>
+                    </svg>
+                    Check AI
+                </button>
+            </div>
+
+            <div id="gemini-loading" class="gemini-loading">✨ AI is analyzing your diary...</div>
+            <div id="gemini-feedback" class="gemini-feedback"></div>
+        </div>
     </div>
 
     <div id="toast" class="toast">Action completed</div>
 
     <script>
         // DOM Elements
+        const introPage = document.getElementById('intro-page');
+        const diaryAppContainer = document.getElementById('diary-app-container');
+        const diaryTitle = document.getElementById('diary-title');
+
         const datePicker = document.getElementById('diary-date');
         const moodPicker = document.getElementById('diary-mood');
         const fileInput = document.getElementById('file-input');
@@ -611,21 +816,49 @@
         const diaryText = document.getElementById('diary-text');
         const toast = document.getElementById('toast');
         let currentPhotoDataUrl = null;
+        let currentUser = null; // Track current user (min or so)
+
+        // Navigation Functions
+        function showDiary(user) {
+            currentUser = user;
+            diaryTitle.textContent = `${user.charAt(0).toUpperCase() + user.slice(1)}'s English Diary`;
+            introPage.classList.add('hidden');
+            diaryAppContainer.classList.add('active');
+            initApp(); // Initialize diary for the selected user
+        }
+
+        function showHome() {
+            introPage.classList.remove('hidden');
+            diaryAppContainer.classList.remove('active');
+            currentUser = null;
+        }
+
 
         // Initialize App
         function initApp() {
-            const localDate = new Date();
-            const year = localDate.getFullYear();
-            const month = String(localDate.getMonth() + 1).padStart(2, '0');
-            const day = String(localDate.getDate()).padStart(2, '0');
-            datePicker.value = `${year}-${month}-${day}`;
+            // Set today's date if empty or for new user session
+            if (!datePicker.value) {
+                const localDate = new Date();
+                const year = localDate.getFullYear();
+                const month = String(localDate.getMonth() + 1).padStart(2, '0');
+                const day = String(localDate.getDate()).padStart(2, '0');
+                datePicker.value = `${year}-${month}-${day}`;
+            }
 
             loadData(datePicker.value);
 
-            // Event Listeners for auto-save and date change
-            datePicker.addEventListener('change', (e) => loadData(e.target.value));
+            // Event Listeners for auto-save and date change - Remove old ones first to avoid duplicates
+            datePicker.removeEventListener('change', handleDateChange);
+            moodPicker.removeEventListener('change', saveData);
+            diaryText.removeEventListener('input', saveData);
+
+            datePicker.addEventListener('change', handleDateChange);
             moodPicker.addEventListener('change', saveData);
             diaryText.addEventListener('input', saveData);
+        }
+
+        function handleDateChange(e) {
+            loadData(e.target.value);
         }
 
         function showToast(message) {
@@ -674,7 +907,7 @@
             const textToShare = `[${datePicker.value} ${moodPicker.value}]\n\n${diaryText.value}`;
             if (navigator.share) {
                 navigator.share({
-                    title: 'My English Diary',
+                    title: diaryTitle.textContent,
                     text: textToShare
                 }).then(() => {
                     showToast('Shared successfully!');
@@ -721,7 +954,8 @@
 
         function adjustTextareaHeight() {
             diaryText.style.height = 'auto';
-            const newHeight = Math.max(diaryText.scrollHeight, 250);
+            // Adjusted minimum height for approximately 10-11 lines
+            const newHeight = Math.max(diaryText.scrollHeight, 330);
             diaryText.style.height = newHeight + 'px';
         }
 
@@ -745,7 +979,8 @@
         function addSticker(iconClass, color) {
             const container = document.getElementById('diary-card');
             const rect = container.getBoundingClientRect();
-            const x = rect.width / 2 - 20;
+            // Default position: center horizontally, near the top
+            const x = rect.width / 2 - 20; // Adjust for sticker width roughly
             const y = 80;
             createPlacedSticker({ iconClass, color, x, y, scale: 2.2 }, true);
         }
@@ -756,8 +991,12 @@
         function createPlacedSticker(data, save = true) {
             const stickerEl = document.createElement('div');
             stickerEl.className = 'placed-sticker sticker-saved-data';
-            stickerEl.style.left = data.x + 'px';
-            stickerEl.style.top = data.y + 'px';
+            // Ensure x and y are numbers and fall back to defaults if necessary
+            const safeX = (typeof data.x === 'number' && !isNaN(data.x)) ? data.x : 100;
+            const safeY = (typeof data.y === 'number' && !isNaN(data.y)) ? data.y : 100;
+
+            stickerEl.style.left = safeX + 'px';
+            stickerEl.style.top = safeY + 'px';
             stickerEl.setAttribute('data-scale', data.scale);
 
             // Create graphic element (FontAwesome icon or old Emoji fallback)
@@ -789,15 +1028,18 @@
                 isDragging = stickerEl;
                 startX = e.clientX;
                 startY = e.clientY;
+                // Get current position, defaulting to 0 if parse fails
                 initialX = parseFloat(stickerEl.style.left) || 0;
                 initialY = parseFloat(stickerEl.style.top) || 0;
                 e.preventDefault();
             };
 
+            // Use container for appending
             document.getElementById('diary-card').appendChild(stickerEl);
             if (save) saveData();
         }
 
+        // Attach mousemove/up to document to handle dragging outside the element
         document.addEventListener('mousemove', function (e) {
             if (isDragging) {
                 const currentX = e.clientX;
@@ -812,7 +1054,7 @@
         document.addEventListener('mouseup', function () {
             if (isDragging) {
                 isDragging = null;
-                saveData();
+                saveData(); // Save final position on mouse up
             }
         });
 
@@ -842,11 +1084,15 @@
             currentPhotoDataUrl = null;
             fileInput.value = '';
             displayPhoto(null);
-            // 기존 화면의 스티커 모두 지우기
             document.querySelectorAll('.placed-sticker').forEach(el => el.remove());
+            // Clear AI feedback as well
+            document.getElementById('gemini-feedback').style.display = 'none';
+            document.getElementById('gemini-feedback').innerHTML = '';
         }
 
         function saveData() {
+            if (!currentUser) return; // Don't save if no user selected
+
             const dateKey = datePicker.value;
             if (!dateKey) return;
 
@@ -861,31 +1107,40 @@
             stickers.forEach(el => {
                 const iconClass = el.getAttribute('data-icon');
                 const emoji = el.getAttribute('data-emoji');
-                if (iconClass || emoji) {
+                // Ensure we have valid position numbers before saving
+                const x = parseFloat(el.style.left);
+                const y = parseFloat(el.style.top);
+
+                if ((iconClass || emoji) && !isNaN(x) && !isNaN(y)) {
                     diaryData.stickers.push({
                         iconClass: iconClass,
                         color: el.getAttribute('data-color'),
                         emoji: emoji,
-                        x: parseFloat(el.style.left),
-                        y: parseFloat(el.style.top),
+                        x: x,
+                        y: y,
                         scale: parseFloat(el.getAttribute('data-scale')) || 2.2
                     });
                 }
             });
 
             try {
-                // 날짜를 키값에 포함시켜서 날짜별로 분리 저장
-                localStorage.setItem('diary_' + dateKey, JSON.stringify(diaryData));
+                // Use user-specific key prefix
+                const storageKey = `${currentUser}_diary_${dateKey}`;
+                localStorage.setItem(storageKey, JSON.stringify(diaryData));
             } catch (e) {
                 console.warn("Storage error", e);
+                showToast("Failed to save diary. Storage might be full.");
             }
         }
 
         function loadData(dateKey) {
-            // 날짜 이동 시 이전 화면 초기화
+            if (!currentUser) return; // Don't load if no user selected
+
             clearView();
 
-            const saved = localStorage.getItem('diary_' + dateKey);
+            // Use user-specific key prefix
+            const storageKey = `${currentUser}_diary_${dateKey}`;
+            const saved = localStorage.getItem(storageKey);
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
@@ -895,21 +1150,24 @@
                         currentPhotoDataUrl = data.photo;
                         displayPhoto(currentPhotoDataUrl);
                     }
-                    if (data.stickers) {
-                        data.stickers.forEach(st => createPlacedSticker(st, false));
+                    if (data.stickers && Array.isArray(data.stickers)) {
+                        data.stickers.forEach(st => {
+                            // Validate sticker data before creation
+                            if ((st.iconClass || st.emoji) && typeof st.x === 'number' && typeof st.y === 'number') {
+                                createPlacedSticker(st, false);
+                            }
+                        });
                     }
                 } catch (e) {
                     console.error("Parse error", e);
+                    showToast("Error loading saved diary data.");
                 }
             }
         }
 
-        window.onload = initApp;
-
 
         // --- Gemini Integration (Fixed for Canvas Environment) ---
-        // 캔버스 환경에서는 API 키를 비워두면 시스템이 알아서 안전하게 키를 주입해 줍니다.
-        const apiKey = ""; 
+        const apiKey = "";
 
         // API 재시도 로직 (안정성 강화)
         async function fetchWithBackoff(url, options, retries = 5) {
@@ -952,7 +1210,7 @@ ${text}`;
             try {
                 // 환경에서 권장하는 최신 Flash Preview 모델로 변경
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-                
+
                 const payload = {
                     contents: [{ parts: [{ text: prompt }] }],
                     systemInstruction: { parts: [{ text: systemInstruction }] }
