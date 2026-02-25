@@ -162,7 +162,6 @@
             transform: translateY(0);
         }
 
-
         .app-container {
             background: var(--card-bg);
             width: 100%;
@@ -204,7 +203,6 @@
         .back-to-home-btn:hover {
             color: var(--text-main);
         }
-
 
         /* Date & Mood */
         .top-controls {
@@ -329,21 +327,17 @@
         /* Text Input - Adjusted Font Size and Line Height */
         .diary-input {
             width: 100%;
-            /* Increase min-height to accommodate 3 more lines */
             min-height: 330px;
             padding: 8px 16px;
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            /* Slightly smaller font size */
             font-size: 1.5rem;
             resize: vertical;
-            /* Adjusted line height to match background */
             line-height: 32px;
             outline: none;
             transition: border-color 0.2s;
             font-family: inherit;
             background-color: #F9FAFB;
-            /* Lined paper effect - must match line-height */
             background-image: repeating-linear-gradient(transparent, transparent 31px, #D1D5DB 31px, #D1D5DB 32px);
             background-attachment: local;
         }
@@ -611,7 +605,6 @@
             gap: 6px;
         }
 
-        /* Add some basic markdown styling for the feedback box */
         .gemini-feedback p {
             margin-bottom: 10px;
         }
@@ -646,10 +639,6 @@
 
         /* Responsive */
         @media (max-width: 480px) {
-            body {
-                /* padding: 10px;  Removed padding from body for full-screen intro */
-            }
-
             .app-container {
                 padding: 16px;
                 border-radius: 12px;
@@ -1167,6 +1156,9 @@
 
 
         // --- Gemini Integration (Fixed for Canvas Environment) ---
+        // ⚠️ 넷플리파이(Netlify)나 깃허브(GitHub)에 파일을 올려서 사용하실 때는 
+        // 반드시 아래의 따옴표("") 사이에 발급받으신 API 키를 직접 넣어주셔야 작동합니다!
+        // 예시: const apiKey = "AIzaSyC5MhxjMl39flSNUbQxoQOGabzhes9CDcU";
         const apiKey = "";
 
         // API 재시도 로직 (안정성 강화)
@@ -1235,7 +1227,9 @@ ${text}`;
             } finally {
                 loadingEl.style.display = 'none';
                 feedbackEl.style.display = 'block';
-                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
+                // 결과가 잘 보이도록 일기장 컨테이너의 스크롤을 맨 아래로 이동
+                const container = document.getElementById('diary-app-container');
+                setTimeout(() => container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' }), 100);
             }
         }
     </script>
