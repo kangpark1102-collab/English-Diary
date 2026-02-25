@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- iOS 앱처럼 보이게 화면 확대 방지 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>English Diary</title>
+    
+    <!-- iOS 홈 화면 아이콘 및 앱 이름 설정 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="English Diary">
+    <!-- 아이콘 이미지 설정 -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%234F46E5' rx='20'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E%F0%9F%93%96%3C/text%3E%3C/svg%3E">
+
+    <!-- Include Marked for rendering Gemini Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Include FontAwesome for Stickers -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --bg-color: #F9FAFB;
+            --card-bg: #FFFFFF;
+            --text-main: #111827;
+            --text-muted: #6B7280;
+            --border-color: #E5E7EB;
+            --radius: 16px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            padding: 30px 20px;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header {
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        /* Date & Mood */
+        .top-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .date-picker {
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.2s;
+            flex-grow: 1;
+            font-family: inherit;
+            background-color: #F9FAFB;
+            cursor: pointer;
+        }
+
+        .date-picker:focus {
+            border-color: var(--primary);
+            background-color: #fff;
+        }
+
+        .mood-picker {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            outline: none;
+            background: #F9FAFB;
+            transition: border-color 0.2s;
+        }
+
+        .mood-picker:focus {
+            border-color: var(--primary);
+            background-color: #fff;
+        }
+
+        /* Photo Box */
+        .photo-upload {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4/3;
+            background-color: #F9FAFB;
+            border: 2px dashed #D1D5DB;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .photo-upload:hover {
+            border-color: var(--primary);
+            background-color: #EEF2FF;
+        }
+
+        .photo-upload img.preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            display: none;
+        }
+
+        .photo-upload span {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            z-index: 1;
+            pointer-events: none;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .photo-upload svg {
+            width: 36px;
+            height: 36px;
+            color: var(--text-muted);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        /* Remove Button for Photo */
+        .remove-photo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 20;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-photo:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        /* Text Input */
+        .diary-input {
+            width: 100%;
+            min-height: 250px;
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1.6rem;
+            resize: vertical;
+            line-height: 32px;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+            background-color: #F9FAFB;
+            background-image: repeating-linear-gradient(transparent, transparent 31px, #D1D5DB 31px, #D1D5DB 32px);
+            background-attachment: local;
+        }
+
+        .diary-input:focus {
+            border-color: var(--primary);
+            background-color: #fff;
+        }
+
+        /* Buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 5px;
+        }
+
+        .btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #F3F4F6;
+            color: var(--text-main);
+            border: 1px solid transparent;
+            padding: 14px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            background: #E5E7EB;
+            border-color: #D1D5DB;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn.primary:hover {
+            background: var(--primary-hover);
+            border-color: transparent;
+        }
+
+        /* Notification Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #111827;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Specific styles for PDF output */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                align-items: flex-start;
+                margin: 0;
+            }
+
+            .app-container {
+                box-shadow: none;
+                border-radius: 0;
+                max-width: 100%;
+                padding: 20px;
+                background: white;
+            }
+
+            .action-buttons,
+            .remove-photo,
+            #file-input,
+            .toast,
+            .photo-upload svg,
+            .photo-upload span {
+                display: none !important;
+            }
+
+            .diary-input {
+                border: none;
+                background-color: white;
+                height: auto;
+                resize: none;
+                overflow: visible;
+                background-image: repeating-linear-gradient(transparent, transparent 31px, #E5E7EB 31px, #E5E7EB 32px);
+            }
+
+            .date-picker,
+            .mood-picker {
+                border: none;
+                background: transparent;
+                appearance: none;
+                -webkit-appearance: none;
+                padding: 0;
+                font-size: 1.3rem;
+                font-weight: bold;
+            }
+
+            .photo-upload {
+                border: none;
+                background: transparent;
+                page-break-inside: avoid;
+            }
+
+            .photo-upload:hover {
+                background: transparent;
+            }
+
+            .sticker-tray {
+                display: none !important;
+            }
+
+            .gemini-feedback,
+            .gemini-loading {
+                display: none !important;
+            }
+        }
+
+        /* --- Sticker Styling --- */
+        .sticker-tray {
+            display: none;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            margin-bottom: -10px;
+        }
+
+        .sticker-tray.active {
+            display: flex;
+        }
+
+        .sticker {
+            font-size: 1.8rem;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.2s;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sticker:hover {
+            transform: scale(1.2) rotate(-5deg);
+        }
+
+        .placed-sticker {
+            position: absolute;
+            cursor: grab;
+            user-select: none;
+            z-index: 50;
+            line-height: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .placed-sticker:active {
+            cursor: grabbing;
+        }
+
+        .sticker-controls {
+            display: none;
+            position: absolute;
+            top: -36px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 4px;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 51;
+            white-space: nowrap;
+        }
+
+        .placed-sticker:hover .sticker-controls {
+            display: flex;
+        }
+
+        .sticker-controls button {
+            border: none;
+            background: #F3F4F6;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+        }
+
+        .sticker-controls button:hover {
+            background: #E5E7EB;
+        }
+
+        /* --- Gemini Feedback Styling --- */
+        .gemini-feedback {
+            margin-top: 15px;
+            padding: 16px;
+            background: #F0FDF4;
+            border: 1px solid #BBF7D0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            display: none;
+            line-height: 1.6;
+            color: #166534;
+        }
+
+        .gemini-feedback h3 {
+            font-size: 1.05rem;
+            color: #166534;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        /* Add some basic markdown styling for the feedback box */
+        .gemini-feedback p { margin-bottom: 10px; }
+        .gemini-feedback strong { font-weight: 700; color: #14532d; }
+        .gemini-feedback ul { margin-left: 20px; margin-bottom: 10px; }
+
+        .gemini-loading {
+            display: none;
+            text-align: center;
+            padding: 15px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .btn.gemini {
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            color: white;
+        }
+
+        .btn.gemini:hover {
+            opacity: 0.9;
+            border-color: transparent;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .app-container {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            .action-buttons {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 6px;
+            }
+
+            .btn {
+                padding: 12px 4px;
+                font-size: 0.7rem;
+            }
+
+            .btn svg {
+                width: 18px;
+                height: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container" id="diary-card" style="position: relative;">
+        <div class="header">
+            <h1>English Diary</h1>
+        </div>
+
+        <div class="top-controls">
+            <input type="date" id="diary-date" class="date-picker">
+            <button class="mood-picker" onclick="toggleStickers()" title="Add Stickers">✨ Stickers</button>
+            <select id="diary-mood" class="mood-picker">
+                <option value="😀">😀</option>
+                <option value="😊">😊</option>
+                <option value="🥰">🥰</option>
+                <option value="😐">😐</option>
+                <option value="😢">😢</option>
+                <option value="😡">😡</option>
+                <option value="😴">😴</option>
+                <option value="🥳">🥳</option>
+            </select>
+        </div>
+
+        <!-- Sticker Tray (FontAwesome) -->
+        <div class="sticker-tray" id="sticker-tray">
+            <span class="sticker" onclick="addSticker('fa-solid fa-heart', '#FF4B4B')"><i class="fa-solid fa-heart" style="color: #FF4B4B;"></i></span>
+            <span class="sticker" onclick="addSticker('fa-solid fa-star', '#FFD700')"><i class="fa-solid fa-star" style="color: #FFD700;"></i></span>
+            <span class="sticker" onclick="addSticker('fa-solid fa-face-smile', '#FF9800')"><i class="fa-solid fa-face-smile" style="color: #FF9800;"></i></span>
+            <span class="sticker" onclick="addSticker('fa-solid fa-cat', '#555555')"><i class="fa-solid fa-cat" style="color: #555555;"></i></span>
+            <span class="sticker" onclick="addSticker('fa-solid fa-dog', '#8B4513')"><i class="fa-solid fa-dog" style="color: #8B4513;"></i></span>
+            <span class="sticker" onclick="addSticker('fa-solid fa-leaf', '#4CAF50')"><i class="fa-solid fa-leaf" style="color: #4CAF50;"></i></span>
+            <span class="sticker" onclick="addSticker('fa-solid fa-music', '#9C27B0')"><i class="fa-solid fa-music" style="color: #9C27B0;"></i></span>
+            <span class="sticker" onclick="addSticker('fa-solid fa-sun', '#FFA500')"><i class="fa-solid fa-sun" style="color: #FFA500;"></i></span>
+            <span class="sticker" onclick="addSticker('fa-solid fa-moon', '#3F51B5')"><i class="fa-solid fa-moon" style="color: #3F51B5;"></i></span>
+            <span class="sticker" onclick="addSticker('fa-solid fa-crown', '#FFC107')"><i class="fa-solid fa-crown" style="color: #FFC107;"></i></span>
+        </div>
+
+        <div class="photo-upload" id="photo-container"
+            onclick="if(event.target.id !== 'remove-btn') document.getElementById('file-input').click()">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z">
+                </path>
+            </svg>
+            <span>Tap to add a photo</span>
+            <img id="photo-preview" class="preview" alt="Diary Photo">
+            <button id="remove-btn" class="remove-photo" onclick="removePhoto(event)">✕</button>
+            <input type="file" id="file-input" accept="image/*" onchange="previewImage(event)">
+        </div>
+
+        <textarea id="diary-text" class="diary-input" placeholder="Write your diary here..."></textarea>
+
+        <div class="action-buttons">
+            <button class="btn" onclick="shareContent()">
+                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z">
+                    </path>
+                </svg>
+                Share
+            </button>
+            <button class="btn" onclick="readAloud()" id="tts-btn">
+                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z">
+                    </path>
+                </svg>
+                Read Aloud
+            </button>
+            <button class="btn primary" onclick="exportPDF()">
+                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3">
+                    </path>
+                </svg>
+                Export PDF
+            </button>
+            <button class="btn gemini" onclick="checkGrammar()">
+                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.428-1.428L13.5 18.75l1.178-.394a2.25 2.25 0 001.428-1.428L16.5 15.75l.394 1.178a2.25 2.25 0 001.428 1.428l1.178.394-1.178.394a2.25 2.25 0 00-1.428 1.428z">
+                    </path>
+                </svg>
+                Check AI
+            </button>
+        </div>
+
+        <div id="gemini-loading" class="gemini-loading">✨ AI is analyzing your diary...</div>
+        <div id="gemini-feedback" class="gemini-feedback"></div>
+    </div>
+
+    <div id="toast" class="toast">Action completed</div>
+
+    <script>
+        // DOM Elements
+        const datePicker = document.getElementById('diary-date');
+        const moodPicker = document.getElementById('diary-mood');
+        const fileInput = document.getElementById('file-input');
+        const photoPreview = document.getElementById('photo-preview');
+        const removeBtn = document.getElementById('remove-btn');
+        const diaryText = document.getElementById('diary-text');
+        const toast = document.getElementById('toast');
+        let currentPhotoDataUrl = null;
+
+        // Initialize App
+        function initApp() {
+            const localDate = new Date();
+            const year = localDate.getFullYear();
+            const month = String(localDate.getMonth() + 1).padStart(2, '0');
+            const day = String(localDate.getDate()).padStart(2, '0');
+            datePicker.value = `${year}-${month}-${day}`;
+
+            loadData(datePicker.value);
+
+            // Event Listeners for auto-save and date change
+            datePicker.addEventListener('change', (e) => loadData(e.target.value));
+            moodPicker.addEventListener('change', saveData);
+            diaryText.addEventListener('input', saveData);
+        }
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Handle Image Upload
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    currentPhotoDataUrl = e.target.result;
+                    displayPhoto(currentPhotoDataUrl);
+                    saveData();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function displayPhoto(dataUrl) {
+            if (dataUrl) {
+                photoPreview.src = dataUrl;
+                photoPreview.style.display = 'block';
+                removeBtn.style.display = 'flex';
+            } else {
+                photoPreview.src = '';
+                photoPreview.style.display = 'none';
+                removeBtn.style.display = 'none';
+            }
+        }
+
+        function removePhoto(event) {
+            event.stopPropagation();
+            currentPhotoDataUrl = null;
+            fileInput.value = '';
+            displayPhoto(null);
+            saveData();
+        }
+
+        function shareContent() {
+            const textToShare = `[${datePicker.value} ${moodPicker.value}]\n\n${diaryText.value}`;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My English Diary',
+                    text: textToShare
+                }).then(() => {
+                    showToast('Shared successfully!');
+                }).catch(err => {
+                    console.error("Error sharing", err);
+                });
+            } else {
+                navigator.clipboard.writeText(textToShare).then(() => {
+                    showToast('Text copied to clipboard!');
+                }).catch(err => {
+                    showToast('Failed to copy text.');
+                });
+            }
+        }
+
+        function readAloud() {
+            if (!diaryText.value) {
+                showToast('Please write something to read aloud.');
+                return;
+            }
+
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                showToast('Reading stopped.');
+                return;
+            }
+
+            const speech = new SpeechSynthesisUtterance(diaryText.value);
+            speech.lang = 'en-US';
+            speech.rate = 0.9;
+            speech.pitch = 1.0;
+
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                const enVoice = voices.find(voice => voice.lang.includes('en-'));
+                if (enVoice) speech.voice = enVoice;
+            }
+
+            speech.onstart = () => showToast('Reading aloud...');
+            speech.onend = () => showToast('Finished reading.');
+
+            window.speechSynthesis.speak(speech);
+        }
+
+        function adjustTextareaHeight() {
+            diaryText.style.height = 'auto';
+            const newHeight = Math.max(diaryText.scrollHeight, 250);
+            diaryText.style.height = newHeight + 'px';
+        }
+
+        function exportPDF() {
+            showToast('Opening Print Dialog...');
+            adjustTextareaHeight();
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        }
+
+        window.speechSynthesis.onvoiceschanged = function () {
+            window.speechSynthesis.getVoices();
+        };
+
+        // --- Sticker Logic ---
+        function toggleStickers() {
+            document.getElementById('sticker-tray').classList.toggle('active');
+        }
+
+        function addSticker(iconClass, color) {
+            const container = document.getElementById('diary-card');
+            const rect = container.getBoundingClientRect();
+            const x = rect.width / 2 - 20;
+            const y = 80;
+            createPlacedSticker({ iconClass, color, x, y, scale: 2.2 }, true);
+        }
+
+        let isDragging = null;
+        let startX, startY, initialX, initialY;
+
+        function createPlacedSticker(data, save = true) {
+            const stickerEl = document.createElement('div');
+            stickerEl.className = 'placed-sticker sticker-saved-data';
+            stickerEl.style.left = data.x + 'px';
+            stickerEl.style.top = data.y + 'px';
+            stickerEl.setAttribute('data-scale', data.scale);
+
+            // Create graphic element (FontAwesome icon or old Emoji fallback)
+            const graphicEl = document.createElement(data.iconClass ? 'i' : 'span');
+            graphicEl.className = 'sticker-graphic ' + (data.iconClass || '');
+            if (data.iconClass) {
+                graphicEl.style.color = data.color;
+                stickerEl.setAttribute('data-icon', data.iconClass);
+                stickerEl.setAttribute('data-color', data.color);
+            } else {
+                graphicEl.textContent = data.emoji;
+                stickerEl.setAttribute('data-emoji', data.emoji);
+            }
+            graphicEl.style.fontSize = data.scale + 'rem';
+
+            const controls = document.createElement('div');
+            controls.className = 'sticker-controls';
+            controls.innerHTML = `
+                <button onclick="resizeSticker(event, this, 0.5)">+</button>
+                <button onclick="resizeSticker(event, this, -0.5)">-</button>
+                <button onclick="removeSticker(event, this)">✕</button>
+            `;
+
+            stickerEl.appendChild(controls);
+            stickerEl.appendChild(graphicEl);
+
+            stickerEl.onmousedown = function (e) {
+                if (e.target.tagName.toLowerCase() === 'button') return;
+                isDragging = stickerEl;
+                startX = e.clientX;
+                startY = e.clientY;
+                initialX = parseFloat(stickerEl.style.left) || 0;
+                initialY = parseFloat(stickerEl.style.top) || 0;
+                e.preventDefault();
+            };
+
+            document.getElementById('diary-card').appendChild(stickerEl);
+            if (save) saveData();
+        }
+
+        document.addEventListener('mousemove', function (e) {
+            if (isDragging) {
+                const currentX = e.clientX;
+                const currentY = e.clientY;
+                const dx = currentX - startX;
+                const dy = currentY - startY;
+                isDragging.style.left = (initialX + dx) + 'px';
+                isDragging.style.top = (initialY + dy) + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', function () {
+            if (isDragging) {
+                isDragging = null;
+                saveData();
+            }
+        });
+
+        function resizeSticker(e, btn, amount) {
+            e.stopPropagation();
+            const stickerEl = btn.closest('.placed-sticker');
+            const graphicEl = stickerEl.querySelector('.sticker-graphic');
+            let scale = parseFloat(stickerEl.getAttribute('data-scale')) || 2.2;
+            scale += amount;
+            if (scale < 1) scale = 1;
+            if (scale > 10) scale = 10;
+            stickerEl.setAttribute('data-scale', scale);
+            graphicEl.style.fontSize = scale + 'rem';
+            saveData();
+        }
+
+        function removeSticker(e, btn) {
+            e.stopPropagation();
+            btn.closest('.placed-sticker').remove();
+            saveData();
+        }
+
+        // --- Data Save/Load ---
+        function clearView() {
+            moodPicker.value = '😀';
+            diaryText.value = '';
+            currentPhotoDataUrl = null;
+            fileInput.value = '';
+            displayPhoto(null);
+            // 기존 화면의 스티커 모두 지우기
+            document.querySelectorAll('.placed-sticker').forEach(el => el.remove());
+        }
+
+        function saveData() {
+            const dateKey = datePicker.value;
+            if (!dateKey) return;
+
+            const diaryData = {
+                mood: moodPicker.value,
+                text: diaryText.value,
+                photo: currentPhotoDataUrl,
+                stickers: []
+            };
+
+            const stickers = document.querySelectorAll('.placed-sticker');
+            stickers.forEach(el => {
+                const iconClass = el.getAttribute('data-icon');
+                const emoji = el.getAttribute('data-emoji');
+                if (iconClass || emoji) {
+                    diaryData.stickers.push({
+                        iconClass: iconClass,
+                        color: el.getAttribute('data-color'),
+                        emoji: emoji,
+                        x: parseFloat(el.style.left),
+                        y: parseFloat(el.style.top),
+                        scale: parseFloat(el.getAttribute('data-scale')) || 2.2
+                    });
+                }
+            });
+
+            try {
+                // 날짜를 키값에 포함시켜서 날짜별로 분리 저장
+                localStorage.setItem('diary_' + dateKey, JSON.stringify(diaryData));
+            } catch (e) {
+                console.warn("Storage error", e);
+            }
+        }
+
+        function loadData(dateKey) {
+            // 날짜 이동 시 이전 화면 초기화
+            clearView();
+
+            const saved = localStorage.getItem('diary_' + dateKey);
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.mood) moodPicker.value = data.mood;
+                    if (data.text) diaryText.value = data.text;
+                    if (data.photo) {
+                        currentPhotoDataUrl = data.photo;
+                        displayPhoto(currentPhotoDataUrl);
+                    }
+                    if (data.stickers) {
+                        data.stickers.forEach(st => createPlacedSticker(st, false));
+                    }
+                } catch (e) {
+                    console.error("Parse error", e);
+                }
+            }
+        }
+
+        window.onload = initApp;
+
+
+        // --- Gemini Integration (Fixed for Canvas Environment) ---
+        // 캔버스 환경에서는 API 키를 비워두면 시스템이 알아서 안전하게 키를 주입해 줍니다.
+        const apiKey = ""; 
+
+        // API 재시도 로직 (안정성 강화)
+        async function fetchWithBackoff(url, options, retries = 5) {
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(res => setTimeout(res, delays[i]));
+                }
+            }
+        }
+
+        async function checkGrammar() {
+            const text = diaryText.value.trim();
+            if (!text) {
+                showToast("Please write some English text first!");
+                return;
+            }
+
+            const loadingEl = document.getElementById('gemini-loading');
+            const feedbackEl = document.getElementById('gemini-feedback');
+
+            loadingEl.style.display = 'block';
+            feedbackEl.style.display = 'none';
+
+            const prompt = `내가 쓴 영어 문장에 대해 아래 규칙에 맞춰 검토해줘.
+1. 문제가 없는 완벽한 문장은 원문을 보여주고 "아주 좋은 일상 표현입니다!" 라고 짧게 칭찬해 주고 넘어가.
+2. 문법적으로 틀렸거나 조금 더 원어민스럽고 괜찮은 표현이 있을 경우, 추천 표현과 그 이유를 한국어로 친절하게 설명해줘.
+아웃풋 형식은 자연스러운 마크다운으로.
+
+일기 원문:
+${text}`;
+
+            const systemInstruction = "You are a helpful and encouraging English tutor. Explain grammar clearly in Korean using markdown.";
+
+            try {
+                // 환경에서 권장하는 최신 Flash Preview 모델로 변경
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    systemInstruction: { parts: [{ text: systemInstruction }] }
+                };
+
+                const data = await fetchWithBackoff(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (data.candidates && data.candidates.length > 0) {
+                    const resultText = data.candidates[0].content.parts[0].text;
+                    feedbackEl.innerHTML = `<h3><svg fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"></path></svg> AI Check Result</h3>
+                        <div style="margin-top:10px;">${marked.parse(resultText)}</div>`;
+                } else {
+                    feedbackEl.innerHTML = "Sorry, I couldn't analyze the text at the moment.";
+                }
+            } catch (err) {
+                console.error(err);
+                feedbackEl.innerHTML = "Error connecting to AI service. Please try again in a moment.";
+            } finally {
+                loadingEl.style.display = 'none';
+                feedbackEl.style.display = 'block';
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
+            }
+        }
+    </script>
+</body>
+
+</html>
